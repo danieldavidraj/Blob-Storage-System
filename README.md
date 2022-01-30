@@ -73,9 +73,16 @@ A Simple Blog Storage System for storing files where users can view, upload, ren
 
 <summary>Files</summary>
 
+* Respective operations can only be performed by authorized users.
+* This is checked via dependencies in path operation decorators provided by FastAPI.
+
+
 **GET** <code>/users/{user_id}/files</code> View all files the user owns 
 
-**POST** <code>/users/{user_id}/files</code> Upload a file to the server. The file will be stored in the ***static*** folder with name in the format ***"<user_id>_<unix_timestamp>"*** because a user with a user id can never upload two files at the same time and the path of the file is stored in the database. Content type and name of the file is also stored. ***Shutil*** python library is used to execute this operation.
+**POST** <code>/users/{user_id}/files</code> 
+* Upload a file to the server. 
+* The file will be stored in the ***static*** folder with name in the format ***"<user_id>_<unix_timestamp>"*** because a user with a user id can never upload two files at the same time and the path of the file is stored in the database. 
+* Content type and name of the file is also stored. ***Shutil*** python library is used to execute this operation.
 
 **GET** <code>/users/{user_id}/files/{file_id}</code> View a specific file only if the user has read permission.
 
@@ -87,7 +94,9 @@ A Simple Blog Storage System for storing files where users can view, upload, ren
 
 **GET** <code>/users/{user_id}/files/{file_id}/download</code> Download a file only if the user has read permission. File is returned using ***FileResponse*** from ***starlette.responses***.
 
-**GET** <code>/users/{user_id}/files/{file_id}/compress</code> Compress a file into zip and download it only if the user has read permission. ***zipfile*** python library is used and the compression method is ***ZIP_DEFLATED***.
+**GET** <code>/users/{user_id}/files/{file_id}/compress</code> 
+* Compress a file into zip and download it only if the user has read permission. 
+* ***zipfile*** python library is used and the compression method is ***ZIP_DEFLATED***.
 
 </details>
 
