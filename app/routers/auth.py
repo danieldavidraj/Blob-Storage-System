@@ -32,7 +32,6 @@ async def login_for_access_token(
             status_code=400,
             detail="Incorrect username or password"
         )
-    print(user.is_admin)
     if user.is_admin:
         scopes=['admin']
     else:

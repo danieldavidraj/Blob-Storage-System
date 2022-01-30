@@ -2,9 +2,9 @@
 
 ---
 
-**Heroku Link**: <a href="https://blob-storage-system.herokuapp.com" target="_blank">Blob Storage System</a>
+**Heroku Deployment Link**: <a href="https://blob-storage-system.herokuapp.com" target="_blank">Blob Storage System</a>
 
-**Video Link**: <a href="https://blob-storage-system.herokuapp.com" target="_blank">Video</a>
+**Video Link**: <a href="https://drive.google.com/file/d/11MFr6Ak-YDwWyU3sGQNvewX-mKkmSWmG/view?usp=sharing" target="_blank">Demo</a>
 
 ---
 
@@ -17,6 +17,7 @@ The key features are:
 * **Authorization**: Authorization using OAuth2 scopes.
 * **Access control**: User based access control on who can access the files, rename and delete.
 * **Compress Files**: Can compress into zip and download files.
+* **Storage**: The files are stored in the 'static' folder with name in the format "<user_id>_<unix_timestamp>" because a user with a user id can never upload two files at the same time and the path of the file is stored in the database.
 
 
 ## Requirements

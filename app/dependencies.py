@@ -67,3 +67,10 @@ async def verify_other_user(user_id: int, user: schemas.UserBase, db: Session = 
             status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
             detail="Can only share with other users"
         )
+
+async def verify_for_enable_disable(user_id: int, current_user: schemas.User = Depends(jwt.get_current_active_user)):
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Can't enable/disable yourself"
+        )

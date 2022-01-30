@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
 
 from .. import crud, schemas, jwt
-from ..dependencies import get_db
+from ..dependencies import get_db, verify_for_enable_disable
 
 router = APIRouter(
     prefix="/admin",
@@ -44,14 +44,14 @@ def read_file(
         raise HTTPException(status_code=404, detail="File not found")
     return db_file
 
-@router.patch("/users/{user_id}/enable", response_model=schemas.UserSchema)
+@router.patch("/users/{user_id}/enable", response_model=schemas.UserSchema, dependencies=[Depends(verify_for_enable_disable)])
 def enable_user(
     user_id: int, db: Session = Depends(get_db), 
-    current_user: schemas.User = Security(jwt.get_current_user, scopes=["admin"])
+    current_user: schemas.User = Security(jwt.get_current_user, scopes=["admin"]),
 ):
     return crud.enable_disable_user(db, user_id=user_id, disable=False)
 
-@router.patch("/users/{user_id}/disable", response_model=schemas.UserSchema)
+@router.patch("/users/{user_id}/disable", response_model=schemas.UserSchema, dependencies=[Depends(verify_for_enable_disable)])
 def disable_user(
     user_id: int, db: Session = Depends(get_db),
     current_user: schemas.User = Security(jwt.get_current_user, scopes=["admin"])
