@@ -28,10 +28,20 @@ async def verify_owner(user_id: int, file_id: int, db: Session = Depends(get_db)
             detail="Not enough permissions"
         )
 
+async def have_permission_view(user_id: int, file_id: int, db: Session = Depends(get_db)):
+    perm = crud.get_permission(db, user_id, file_id)
+    if not perm:
+        raise HTTPException(status_code=404, detail="Not enough permissions")
+    if perm.view != True:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not enough permissions"
+        )
+
 async def have_permission_rename(user_id: int, file_id: int, db: Session = Depends(get_db)):
     perm = crud.get_permission(db, user_id, file_id)
     if not perm:
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="Not enough permissions")
     if perm.rename != True:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,7 +51,7 @@ async def have_permission_rename(user_id: int, file_id: int, db: Session = Depen
 async def have_permission_delete(user_id: int, file_id: int, db: Session = Depends(get_db)):
     perm = crud.get_permission(db, user_id, file_id)
     if not perm:
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="Not enough permissions")
     if perm.delete != True:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

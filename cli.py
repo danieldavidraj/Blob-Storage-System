@@ -76,9 +76,13 @@ def Authentication():
             try:
                 choice = int(input("Choice: "))
                 if choice == 1:
-                    return Login()
+                    token = Login()
+                    if token:
+                        return token
                 elif choice == 2:
-                    return Register()
+                    token = Register()
+                    if token:
+                        return token
                 else:
                     print("Invalid entry")
             except ValueError as ve:
@@ -119,7 +123,7 @@ def upload_file(id):
         file_name = input("Enter the file name: ")
         if file_exists(file_name):
             content_type = mimetypes.guess_type(file_name)
-            files = {'uploadfile': (file_name, open('runtime.txt', 'rb'), content_type[0])}
+            files = {'uploadfile': (file_name, open(file_name, 'rb'), content_type[0])}
             response = session.post(f"{base_url}/users/{id}/files", files=files)
             response.raise_for_status()
         else:
@@ -171,36 +175,38 @@ def download_file(id):
     file_id = input("Enter the id of the file to download: ")
     try: 
         response = session.get(f"{base_url}/users/{id}/files/{file_id}/download", allow_redirects=True)
-        content_type = response.headers.get('content-type')
-        extension = content_type.split("/")[1]
-        cd = response.headers.get('content-disposition')
-        fname = re.findall('filename=(.+)', cd)
-        fname = fname[0].replace('"', '')
-        if extension not in fname:
-            fname = fname + "." + extension
-        open(fname, 'wb').write(response.content)
         response.raise_for_status()
     except HTTPError as http_err:
         print(response.json()['detail'])
     else:
+        content_type = response.headers.get('content-type')
+        extension = content_type.split("/")[-1]
+        if 'plain' in extension:
+            extension = 'txt'
+        cd = response.headers.get('content-disposition')
+        fname = re.findall("filename=(.+)", cd)
+        if not fname:
+            fname = re.findall("utf-8''(.+)", cd)
+        fname = fname[0].replace('"', '').replace('%20', ' ')
+        if extension not in fname:
+            fname += '.' + extension
+        open(fname, 'wb').write(response.content)
         print("Successfully downloaded")   
 
 def compress_file(id):
     file_id = input("Enter the id of the file to compress: ")
     try: 
         response = session.get(f"{base_url}/users/{id}/files/{file_id}/compress", allow_redirects=True)
-        content_type = response.headers.get('content-type')
-        extension = content_type.split("/")[1]
-        cd = response.headers.get('content-disposition')
-        fname = re.findall('filename=(.+)', cd)
-        fname = fname[0].replace('"', '')
-        if extension not in fname:
-            fname = fname + "." + extension
-        open(fname, 'wb').write(response.content)
         response.raise_for_status()
     except HTTPError as http_err:
         print(response.json()['detail'])
     else:
+        cd = response.headers.get('content-disposition')
+        fname = re.findall("filename=(.+)", cd)
+        if not fname:
+            fname = re.findall("utf-8''(.+)", cd)
+        fname = fname[0].replace('"', '').replace('%20', ' ')
+        open(fname, 'wb').write(response.content)
         print("Successfully compressed and downloaded")   
 
 def logout():
@@ -283,12 +289,17 @@ if __name__=="__main__":
         "accept": "application/json",
         "Authorization": token
     })
-    response = session.get(f"{base_url}/users/me/")
+    
+    try: 
+        response = session.get(f"{base_url}/users/me/")
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(response.json()['detail'])
+    else:
+        id = response.json()['id']
+        print(f"Username: {response.json()['username']}")
 
-    id = response.json()['id']
-    print(f"Username: {response.json()['username']}")
-
-    Menu(id)
+        Menu(id)
 
     
         

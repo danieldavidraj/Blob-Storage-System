@@ -8,7 +8,15 @@ from sqlalchemy.orm import Session
 from starlette.responses import FileResponse
 
 from .. import crud, schemas
-from ..dependencies import verify_user, verify_owner, get_db, have_permission_rename, have_permission_delete, verify_other_user
+from ..dependencies import (
+    verify_user, 
+    verify_owner, 
+    get_db, 
+    have_permission_rename, 
+    have_permission_delete, 
+    verify_other_user, 
+    have_permission_view
+)
 
 router = APIRouter(
     prefix="/users/{user_id}",
@@ -36,7 +44,8 @@ def upload_file(user_id: int, uploadfile: UploadFile = File(...), db: Session = 
     return crud.upload_file(db=db, title=uploadfile.filename, path=path, type=uploadfile.content_type, user_id=user_id)
 
 @router.get(
-    "/files/{file_id}", response_model=schemas.File
+    "/files/{file_id}", response_model=schemas.File,
+    dependencies=[Depends(have_permission_view)]
 )
 def view_file(file_id: int, db: Session = Depends(get_db)):
     db_file = crud.get_file(db, file_id=file_id)
@@ -69,7 +78,8 @@ def share_file(file_id: int, user: schemas.UserBase, db: Session = Depends(get_d
     return crud.share_file(db, file_id=file_id, username=user.username)
 
 @router.get(
-    "/files/{file_id}/download"
+    "/files/{file_id}/download",
+    dependencies=[Depends(have_permission_view)]
 )
 def download_file(file_id: int, db: Session = Depends(get_db)):
     file = crud.get_file(db, file_id)
@@ -81,7 +91,8 @@ def download_file(file_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="File path not found")
 
 @router.get(
-    "/files/{file_id}/compress"
+    "/files/{file_id}/compress",
+    dependencies=[Depends(have_permission_view)]
 )
 def compress_file(file_id: int, db: Session = Depends(get_db)):
     file = crud.get_file(db, file_id)
@@ -93,6 +104,8 @@ def compress_file(file_id: int, db: Session = Depends(get_db)):
     zf = zipfile.ZipFile(zip_file_name, mode="w")
     try:
         extension = file.type.split("/")[1]
+        if 'plain' in extension:
+            extension = 'txt'
         if extension not in file.title:
             file_title_extension = f"{file.title}.{extension}"
             file_title_without_extension = file.title
