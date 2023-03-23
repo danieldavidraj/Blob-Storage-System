@@ -131,11 +131,19 @@ $ pip install -r requirements.txt
 ---> 100%
 ```
 
-Run the server with:
+Run the server with (prod):
 
 ```console
-$ uvicorn app.main:app
+$ python3 -m uvicorn app.main:app
+```
 
+Run the server with (dev):
+
+```console
+$ python3 -m uvicorn app.main:app --reload
+```
+
+```console
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 INFO:     Started reloader process [28720]
 INFO:     Started server process [28722]
